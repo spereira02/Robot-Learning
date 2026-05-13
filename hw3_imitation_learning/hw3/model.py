@@ -6,7 +6,8 @@ import abc
 from typing import Literal, TypeAlias
 
 import torch
-from torch import nn
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 class BasePolicy(nn.Module, metaclass=abc.ABCMeta):
@@ -28,6 +29,25 @@ class BasePolicy(nn.Module, metaclass=abc.ABCMeta):
         """Generate a chunk of actions with shape (batch, chunk_size, action_dim)."""
         raise NotImplementedError
 
+class MLP(nn.Module):
+    def __init__(
+            self, 
+            d_ff: int, 
+            depth: int, 
+    ) -> None:
+        
+        super().__init__()
+       
+        layers: list[nn.Module] = []
+        for _ in range(depth):
+            layers.extend([
+                nn.Linear(d_ff, d_ff),
+                nn.GELU(),
+            ])
+
+        self.mlp = nn.Sequential(*layers)
+    def forward(self, x:torch.Tensor) -> torch.Tensor:
+        return self.mlp(x)
 
 # TODO: Students implement ObstaclePolicy here.
 class ObstaclePolicy(BasePolicy):
@@ -36,16 +56,33 @@ class ObstaclePolicy(BasePolicy):
     A simple MLP that maps a state vector to a flat action chunk
     (chunk_size * action_dim) and reshapes to (B, chunk_size, action_dim).
     """
-
-    def forward(self) -> torch.Tensor:
+    def __init__(
+        self,
+        state_dim: int,
+        action_dim: int,
+        chunk_size: int,
+        d_model: int = 128,
+        depth: int = 2,
+    ) -> None:
+        super().__init__(state_dim, action_dim, chunk_size)
+        
+        self.net = nn.Sequential(
+            nn.Linear(state_dim, d_model),
+            MLP(d_model, depth),
+            nn.Linear(d_model, chunk_size * action_dim),
+            )       
+    def forward(self, state: torch.Tensor) -> torch.Tensor:
         """Return predicted action chunk of shape (B, chunk_size, action_dim)."""
-        raise NotImplementedError
+        x = self.net(state)
+        return x.reshape(state.shape[0], self.chunk_size, self.action_dim)
+        
 
     def compute_loss(self, state: torch.Tensor, action_chunk: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        pred_action_chunk = self(state)
+        return nn.MSELoss()(pred_action_chunk, action_chunk)
 
     def sample_actions(self, state: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError
+        return self(state)
 
 
 # TODO: Students implement MultiTaskPolicy here.
