@@ -1,12 +1,17 @@
+.gitignore
 README.md
 pyproject.toml
 requirements.txt
 hw3/__init__.py
 hw3/dataset.py
 hw3/eval_utils.py
+hw3/keymap.json
 hw3/model.py
 hw3/sim_env.py
 hw3/teleop_utils.py
+hw3/__pycache__/__init__.cpython-312.pyc
+hw3/__pycache__/sim_env.cpython-312.pyc
+hw3/__pycache__/teleop_utils.cpython-312.pyc
 hw3_imitation_learning.egg-info/PKG-INFO
 hw3_imitation_learning.egg-info/SOURCES.txt
 hw3_imitation_learning.egg-info/dependency_links.txt
@@ -20,6 +25,8 @@ scripts/record_teleop_demos.py
 scripts/train.py
 so101_gym/__init__.py
 so101_gym/constants.py
+so101_gym/__pycache__/__init__.cpython-312.pyc
+so101_gym/__pycache__/constants.cpython-312.pyc
 so101_gym/assets/scene_so100.xml
 so101_gym/assets/so100_multicube_ee.xml
 so101_gym/assets/so100_transfer_cube_obstacle_ee.xml
