@@ -150,10 +150,27 @@ def compute_actions_for_episodes(
     Default (action_fn=None) uses simple subtraction: state[t+1] - state[t].
 
     Returns:
-        out_states:       (N', D) - states with the last step of each episode removed
-        out_actions:      (N', D) - corresponding delta actions
-        out_episode_ends: (num_episodes,) - cumulative end indices for the trimmed data
-        keep_idx:         (N',) - original indices of kept timesteps (for aligning other arrays)
+        -out_states:       (N', D) - states with the last step of each episode removed, since last state isnt used to predict next action
+            ------------------------
+            states:
+            t0, t1, t2, t3
+            The valid transitions are:
+
+            t0 -> t1
+            t1 -> t2                        -> out_states  = [t0, t1, t2]
+            t2 -> t3                        -> out_actions = [t1 - t0, t2 - t1, t3 - t2]
+            ------------------------
+        -out_actions:      (N', D) - corresponding delta actions
+        -out_episode_ends: (num_episodes,) - cumulative end indices for the trimmed data
+            -------------------------------------
+            episode 1 states: a0, a1, a2, a3    original length: episode 1: 4 states
+            episode 2 states: b0, b1, b2        original length: episode 2: 3 states
+            Original lengths:
+
+            After converting to transitions:
+            episode 1 keeps: a0, a1, a2      # length 3
+            episode 2 keeps: b0, b1          # length 2
+        -keep_idx:         (N',) - original indices of kept timesteps (for aligning other arrays)
     """
     out_states_list: list[np.ndarray] = []
     out_actions_list: list[np.ndarray] = []
