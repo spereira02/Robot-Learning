@@ -108,18 +108,22 @@ def build_policy(
     *,
     state_dim: int,
     action_dim: int,
-    # TODO,
+    chunk_size: int = 16,
+    d_model: int = 128,
+    depth: int = 2,
 ) -> BasePolicy:
     if policy_type == "obstacle":
         return ObstaclePolicy(
             action_dim=action_dim,
             state_dim=state_dim,
-            # TODO: Build with your chosen specifications
+            chunk_size=chunk_size,
+            d_model=d_model,
+            depth=depth,
         )
     if policy_type == "multitask":
         return MultiTaskPolicy(
             action_dim=action_dim,
             state_dim=state_dim,
-            # TODO: Build with your chosen specifications
+            chunk_size=chunk_size,
         )
     raise ValueError(f"Unknown policy type: {policy_type}")

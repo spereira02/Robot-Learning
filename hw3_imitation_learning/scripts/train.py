@@ -97,6 +97,13 @@ def main() -> None:
         "--zarr", type=Path, required=True, help="Path to processed .zarr store."
     )
     parser.add_argument(
+        "--extra-zarr",
+        type=Path,
+        nargs="*",
+        default=[],
+        help="Optional extra processed .zarr stores to merge with --zarr.",
+    )
+    parser.add_argument(
         "--policy",
         choices=["obstacle", "multitask"],
         default="obstacle",
@@ -202,7 +209,7 @@ def main() -> None:
         args.policy,
         state_dim=states.shape[1],
         action_dim=actions.shape[1],
-        # TODO: build with your desired specifications
+        chunk_size=args.chunk_size,
     ).to(device)
 
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -243,7 +250,7 @@ def main() -> None:
     for epoch in range(1, DEFAULT_EPOCHS + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, device)
         val_loss = evaluate(model, val_loader, device)
-        scheduler.step()
+        scheduler.step(val_loss)
 
         tag = ""
         if val_loss < best_val:
